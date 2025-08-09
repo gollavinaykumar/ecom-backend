@@ -29,6 +29,38 @@ export const createOrder = async (req, res, next) => {
   }
 };
 
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate input
+    if (!status) {
+      return res.status(400).json({ message: "Status is required" });
+    }
+
+    const existingOrder = await prisma.order.findUnique({
+      where: { id },
+    });
+    if (!existingOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: { status },
+    });
+
+    res.status(200).json({
+      message: "Order status updated successfully",
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getOrdersByUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
